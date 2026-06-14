@@ -30,15 +30,13 @@
 
 = Autres
 
-#text(red, "Entropie"): mesure quantité information moyenne par symbole (en bits). Intuition: si prochain symbole est toujours prévisible => entropie faible (peu d'information). Si tout est imprévisible, entropie maximale. #text(purple, $H(X) = −∑ p(x) · log_2(p(x))$)
+#text(red, "Entropie"): mesure quantité information moyenne par symbole (en bits). Intuition: si prochain symbole toujours prévisible => entropie faible (peu d'information). Si tout imprévisible, entropie maximale. #text(purple, $H(X) = −∑ p(x) · log_2(p(x))$)
 #text(red, "Shannon-Hartley"): fixe débit *maximal théorique* d'un canal. Intuition: plus canal est large (grande bande passante $B_p$) et plus signal est fort par rapport au bruit (grand SNR), plus on peut transmettre de données. #text(purple, $C = B_p · log_2(1 + "SNR")$), $B_p$ = bande passante (Hz), SNR = rapport signal/bruit (sans unité). Consequence: doubler la bande passante double la capacité; doubler le SNR l'augmente seulement de 1 bit/s/Hz.
 #text(red, "Théorème 1 (compression)"): On peut compresser une source jusqu'à son entropie, mais pas en dessous (entropie est limite théorique compression sans perte).
 #text(red, "Théorème 2 (correction d'erreurs)"): Si débit d'envoi est inférieur à capacité C du canal, il existe code correcteur qui réduit taux d'erreur aussi proche de zéro qu'on veut (même sur canal bruité).
 #text(red, "Théorème 3 (sécurité parfaite)"): Sécurité parfaite est possible si: clef est au moins aussi longue que message, clef est choisie uniformément au hasard et utilisée seule fois. Principe du *One-Time Pad*.
 #text(red, "Contraintes Economique"): Time to Market, Economy of Scale, Economy of Scope, Energy optimization, Autonomy, User Centric, User Experience, Ubiquitous.
 #text(red, "Contraintes Techniques"): Couverture globale, Convergence IP, Convergence Fixe_Mobile, Zero_Trust Security, Cross-Layring Security, Couverture Globale, Latence et Gigue, Débit, SDN, Réseaux Privés Open-RAN.
-// TODO to remove if not enough space
-#image("img/chart_of_elec_spectrum.png", width: 100%)
 #text(red, "SLA for Industry Digital Transformation"): définit un SLA réseau 5G industriel selon 3 axes : *Capabilities*: Bandwidth, Latency, Jitter, Packet Loss Rate, Availability, High Precise Positioning, WAN/LAN Networking *Operation*: DIY Operation, Self-management, Self-provisioning, Self-operation, Self-define Network, Online/Offline Order, Dedicated Network *Security*: Data/Signaling Protection, Isolation Level, Secure Level
 #text(red, "FDD (Frequency Division Duplex)"): Permet la communication bidirectionnelle (UL = uplink mobile→antenne, DL = downlink antenne→mobile), UL et DL sur deux fréquences différentes simultanément, simple à implémenter, pas de synchronisation, nécessite un spectre paired (deux bandes séparées), ratio UL/DL fixe.
 #text(red, "TDD (Time Division Duplex)"): Permet la communication bidirectionnelle, UL et DL sur la même fréquence, synchronisation réseau obligatoire, une seule bande suffit (pas de spectre paired), Ratio UL/DL ajustable dynamiquement adapté au trafic asymétrique (ex. streaming)
@@ -69,8 +67,22 @@
     [5G], [1–10 ms],
   ),
 )
-#text(red, "SIP (Session Initiation Protocol)"): protocole de signalisation inspiré de HTTP/SMTP pour établir, modifier et terminer des sessions multimédia (VoIP, vidéo, IM). Encodage texte lisible (INVITE, BYE, ACK...), transport TCP/UDP/SCTP. Délègue la description des paramètres media (codecs, ports) à SDP. Sécurité via TLS (signalisation) + SRTP (media). Architecture pair-à-pair avec serveurs optionnels (proxy, registrar). Flexible, extensible, standard moderne.
-#text(red, "H.323"): standard ITU-T (1996) plus ancien pour VoIP d'entreprise. Encodage binaire ASN.1 (compact mais illisible), TCP uniquement. Négociation via H.245 (capabilities exchange très riche mais complexe à implémenter). Pas de messagerie instantanée. Sécurité limitée. Présent dans les systèmes legacy (Cisco, Polycom).
+#text(red, "H.323"): standard ITU-T plus ancien pour VoIP d'entreprise. Encodage binaire ASN.1 (compact mais illisible), TCP uniquement. Négociation via H.245 (capabilities exchange riche mais complexe implémenter). Pas messagerie instantanée. Sécurité limitée. Présent dans systèmes legacy.
+#text(red, "Session Initiation Protocol (SIP)"): Remplace H.323. Protocole signalisation inspiré de HTTP/SMTP pour établir, modifier et terminer sessions multimédia (VoIP, vidéo). Encodage texte lisible, transport TCP/UDP/SCTP. Délègue description paramètres media (codecs, ports) à SDP. Sécurité via TLS + SRTP. Architecture pair-à-pair avec serveurs optionnels (proxy, registrar). Flexible, extensible, standard moderne.
+#table(
+  columns: (auto, 1fr, 1fr),
+  inset: 3pt,
+  stroke: 0.4pt,
+  align: left,
+  table.header[*Critère*][*SIP*][*H.323*],
+  [Codage], [Texte (lisible)], [Binaire ASN.1],
+  [Transport], [TCP / UDP / SCTP], [TCP],
+  [Récup. erreurs], [par lui-même], [par TCP],
+  [Échange capabilities], [SDP (simple)], [H.245 (riche, complexe)],
+  [Sécurité], [Protocoles IETF (TLS, SRTP)], [Moyenne],
+  [Messagerie inst.], [Oui], [Non],
+  [Caractéristiques], [Maintien, transfert, attente, conférence, IM], [Maintien, transfert, attente, conférence],
+)
 #text(red, "UAC (User Agent Client)"): entité SIP qui initie les requêtes (ex: l'appelant envoie INVITE).
 #text(red, "UAS (User Agent Server)"): entité SIP qui reçoit et répond aux requêtes (ex: l'appelé répond 200 OK). Un endpoint est généralement les deux à la fois (User Agent = UAC + UAS).
 
@@ -551,6 +563,10 @@ Priorités : VoLTE signaling (1er, QCI 5) → voix (QCI 1) → gaming/V2X (QCI 3
   [Msg serveur initié], [Oui (RAR)], [Non], [Non],
   [Taille max paquet], [Illimitée (grands AVP)], [4 096 octets], [—],
   [Roaming natif], [Oui], [Non], [Non],
+  [Capabilities Négociation], [Oui (apps + niveau sécurité)], [Non], [Non],
+  [Peer Discovery], [Statique + dynamique], [Statique], [Statique],
+  [Taille max attribut (AVP)], [16 777 215 octets], [255 octets], [—],
+  [Vendor-specific], [Messages + attributs], [Attributs seuls], [—],
   [Usage principal], [LTE/4G, mobilité IP], [Wi-Fi, VPN, accès réseau], [Admin équipements réseau],
   [Standard], [Ouvert RFC 6733], [Ouvert RFC 2865], [Cisco RFC 8907],
 )
