@@ -123,43 +123,47 @@
 #text(red, "Cell Identifier (CI)"): identifie une cellule. LAI+CI identifie de manière unique une cellule au niveau international.
 #text(red, "Mobile Station Roaming Number (MSRN)"): numéro d'acheminement temporaire alloué par VLR, permet aux commutateurs d'atteindre MSC où se trouve un mobile en roaming lors d'un appel entrant.
 #text(red, "GSM auth"): protocole challenge-response entre mobile (SIM) et opérateur, tous deux connaissant Ki. *1)* opérateur envoie challenge *RAND* au mobile. *2)* SIM calcule SRES = A3(Ki, RAND) et Kc = A8(Ki, RAND), renvoie SRES. *3)* opérateur calcule son propre SRES et compare : si égaux => abonné authentifié. *4)* Kc sert ensuite à chiffrer données via A5. Ki transite jamais sur réseau.
-#image("img/gsm_auth.png", width: 100%)
-#image("img/a3_a8.png", width: 100%)
-#image("img/a5.png", width: 100%)
+#image("img/gsm_auth.png", width: 90%)
+#image("img/a3_a8.png", width: 90%)
 #text(red, "A5 (chiffrement radio)"): chiffrement par flot (stream cipher), implémenté hardware. Prend Kc + Fn (numéro de trame) => keystream, XORé avec données.
-#image("img/attack_extract_key_from_sim.png", width: 100%)
+#image("img/a5.png", width: 90%)
 #text(red, "Attack Extracting key from SIM"): *Goal*: extraire Ki de SIM pour cloner. *Principe cardinal*: bits intermédiaires du calcul doivent être statistiquement indépendants des entrées, sorties et données sensibles. *Idée*: trouver violation du principe via canaux auxiliaires (side channels) dont signaux dépendent Ki  *Méthode*: exploiter dépendance statistique entre signaux et Ki.
+#image("img/attack_extract_key_from_sim.png", width: 85%)
 #text(red, "Attack fake BS (IMSI Catcher)"): fausse station de base se fait passer pour vraie BTS. Exploite fait que GSM n'authentifie que mobile (pas réseau): téléphone se connecte automatiquement au signal le + fort. *Conséquences*: capture des IMSI/TMSI, interception des appels, forçage du chiffrement A5/2 (faible) voire désactivation du chiffrement. *Outils*: tiSRP, OpenBTS. Utilisé par les forces de l'ordre mais aussi par des attaquants.
-#image("img/ss7_attack_1.png", width: 100%)
-#image("img/ss7_attack_2.png", width: 100%)
+#image("img/ss7_attack_1.png", width: 80%)
+#image("img/ss7_attack_2.png", width: 85%)
 #text(red, "Attack: Location Tracking using SS7"): exploite absence auth SS7 pour localiser abonné. *1)*: envoyer `sendRoutingInfoForSM` au HLR => réponse avec IMSI + adresse du MSC/VLR courant. *2)*: envoyer `provideSubscriberInfo` au MSC => le MSC page mobile et répond avec Cell ID. LAI+CI permet de localiser géographiquement abonné.
-#image("img/attack_ssl_dos.png", width: 100%)
+#image("img/attack_ssl_dos.png", width: 85%)
 #text(red, "Attack: SS7 Denial of Service"): une fois IMSI et adresse VLR obtenus, attaquant peut modifier données de abonné (aucune vérification chez plupart opérateurs). En envoyant `insertSubscriberData`, `deleteSubscriberData` ou `cancelLocation` au VLR, il peut contrôler disponibilité services: désactiver appels sortants, couper connectivité, etc.
-#image("img/sms_1.png", width: 100%)
-#image("img/sms_2.png", width: 100%)
+#image("img/sms_1.png", width: 85%)
+#image("img/sms_2.png", width: 85%)
 #text(red, "Attack: SS7 SMS Interception (Man-in-the-Middle)"): Similaire à MITM, intercepte SMS (ex. codes 2FA). *1)*: attaquant enregistre MSISDN de victime sur faux MSC via SS7 => vrai HLR met à jour localisation vers faux MSC => (C) vrai HLR demande vrai MSC de libérer mémoire. *2)*: banque envoie SMS => le SMS-C demande localisation au HLR => HLR répond avec adresse du faux MSC => SMS-C achemine SMS vers attaquant.
 #text(red, "UMTS (Universal Mobile Telecommunications System)"): technologie téléphonie mobile 3G, successeur GSM. Réutilise principes sécurité GSM (module hardware amovible, chiffrement radio, protection identité) mais corrige failles: *USIM* remplace SIM (authentification mutuelle), confiance limitée au réseau visité, clés/données d'auth ne transitent + en clair, chiffrement obligatoire, *intégrité des données* ajoutée. Corrige aussi attaques par fausse station de base.
-#image("img/umts.png", width: 100%)
+#image("img/umts.png", width: 85%)
 #text(red, "Radio Network Controller (RNC)"): remplace BSC, contrôle plusieurs NodeB, gère handover, allocation ressources radio et chiffrement.
 #text(red, "Gateway Mobile Switching Center (GMSC)"): point sortie réseau vers autres réseaux (PSTN, autres opérateurs).
 #text(red, "Serving GPRS Support Node (SGSN)"): nœud data du cœur, gère mobilité et auth pour trafic paquet, achemine données entre RNC et GGSN.
 #text(red, "Gateway GPRS Support Node (GGSN)"): passerelle entre réseau mobile et Internet, attribue adresses IP aux mobiles et route trafic vers extérieur.
 #text(red, "USIM (Universal Subscriber Identity Module)"): version 3G de SIM, supporte AKA (auth and Key Agreement) et permet auth mutuelle : terminal peut aussi auth réseau (protection contre fausses stations de base).
 #text(red, "NodeB"): station de base UMTS, connectée au RNC via interface Iub, gère interface radio WCDMA avec terminaux.
-#image("img/umts_auth.png", width: 100%)
 #text(red, "UMTS AKA — Flux général"): protocole à 3 parties (Mobile/USIM, Réseau visité, Home Env./HLR). * 1)* Home Env. génère vecteurs d'auth et les envoie au réseau visité. *2)* Réseau visité envoie RAND || AUTN au mobile. *3)* Mobile vérifie AUTN => réseau authentifié. *4)* Mobile envoie RES. *5)* Réseau compare RES=XRES => mobile authentifié. *6)* Les deux dérivent CK et IK. K ne quitte jamais SIM ni HLR.
-#image("img/gen_auth_vector_hn.png", width: 100%)
-#text(red, "UMTS AKA — Génération des vecteurs"): HLR calcule via f1-f5(K, RAND, SQN): MAC=f1 (authenticité), XRES=f2 (vérif mobile), CK=f3 (chiffrement), IK=f4 (intégrité), AK=f5 (masquage SQN). Construit AUTN = (SQN XOR AK) || AMF || MAC: SQN masqué par AK pour vie privée, MAC prouve auth du réseau. Vecteur complet: AV = RAND || XRES || CK || IK || AUTN.
-#image("img/user_auth_usim.png", width: 100%)
+#image("img/umts_auth.png", width: 100%)
+#text(red, "UMTS AKA — Génération des vecteurs"):
+#image("img/gen_auth_vector_hn.png", width: 85%)
 #text(red, "UMTS AKA — Vérification côté mobile"): mobile recalcule AK=f5(K,RAND), démasque SQN=(SQN XOR AK)XOR AK, vérifie MAC=f1(K,...) => réseau authentique. Vérifie que SQN est dans plage valide (anti-replay). Calcule RES=f2, CK=f3, IK=f4.
+#image("img/user_auth_usim.png", width: 85%)
 #text(red, "MILENAGE"): implémentation de référence 3GPP des fonctions f1-f5, basée sur AES. Opérateur-spécifique mais MILENAGE fourni comme exemple standard.
-#image("img/signal_integrity_protection.png", width: 100%)
+#image("img/signal_integrity_protection.png", width: 85%)
 #text(red, "f9 — Intégrité signalisation"): protège messages de signalisation NAS/RRC.
-#image("img/f9.png", width: 100%)s
+#image("img/f9.png", width: 85%)s
 #text(red, "f8 — Chiffrement"): chiffrement par flot des données.
-#image("img/f8.png", width: 100%)
-#text(red, "LTE"): technologie 4G, évolution de UMTS, tout IP, + rapide et + efficace que générations précédentes. *Sécurité*: Réutilise AKA (auth and Key Agreement) d'UMTS avec hiérarchie clés étendue. Permet clés + longues et offre protection renforcée du backhaul.
-#image("img/4g_network.png", width: 50%)
+#image("img/f8.png", width: 85%)
+#grid(
+  columns: (1fr, auto),
+  gutter: 4pt,
+  [#text(red, "LTE"): technologie 4G, évolution de UMTS, tout IP, + rapide et + efficace que générations précédentes. *Sécurité*: Réutilise AKA (auth and Key Agreement) d'UMTS avec hiérarchie clés étendue. Permet clés + longues et offre protection renforcée du backhaul.],
+  image("img/4g_network.png", width: 3.5cm),
+)
 #image("img/lte_arch.png", width: 100%)
 #text(red, "Backhaul"): liaison réseau entre station de base (eNodeB) et cœur du réseau (EPC). En LTE, lien est protégé par IPsec car transite souvent sur liaisons non dédiées (fibre, micro-ondes) exposées.
 #text(red, "Evolved Packet System (EPS)"): = Réseau 4G séparé en RAN et CN.
@@ -180,7 +184,7 @@
 #text(red, "QoS — QCI (QoS Class Identifier)"): en cas de congestion radio, flux sont priorisés par QCI.
 #text(red, "GBR (Guaranteed Bit Rate)"): bande passante réservée, utilisé pour voix/vidéo temps réel.
 #text(red, "LTE auth (EPS-AKA)"): similaire à UMTS AKA mais avec hiérarchie de clés étendue. *1)* UE envoie IMSI au MME. *2)* MME envoie IMSI + SN id (Serving Network ID) au HSS. *3)* HSS exécute EPS AKA (K, RAND, SQN, SN ID) => génère AUTN\_hss, XRES, K\_ASME. *4)* MME envoie RAND || AUTN à l'UE. *5)* UE exécute EPS AKA côté mobile => génère AUTN\_UE, RES, K\_ASME. *6)* UE envoie RES au MME. *Vérifications*: AUTN\_UE = AUTN\_hss (réseau authentifié), RES = XRES (mobile authentifié). *K\_ASME (Key Access Security Management Entity)*: clé racine LTE dérivée avec SN ID, de laquelle sont dérivées toutes clés de chiffrement et d'intégrité.
-#image("img/lte_auth.png", width: 100%)
+#image("img/lte_auth.png", width: 80%)
 
 = 5G
 
@@ -192,7 +196,7 @@
 *5G NSA (Non-Standalone)*: radio 5G (gNB) + core 4G (EPC) — déploiement rapide, ne libère pas tout le potentiel 5G.
 *5G SA (Standalone)*: radio 5G + 5G Core dédié — plein potentiel : ultra-low latency, network slicing, cloud-native.
 #image("img/5g_network.png", width: 100%)
-#image("img/5g_2.png", width: 100%)
+#image("img/5g_2.png", width: 85%)
 #text(red, "5G Core — Control Plane"): gère signalisation, auth, mobilité et politiques. Architecture orientée services (SBI), chaque fonction expose API REST. *Composé de*: AMF, SMF, AUSF, UDM, PCF, NSSF, NEF, NRF.
 #text(red, "AMF (Access & Mobility Function)"): remplace MME, registration, connection, reachability, mobility management.
 #text(red, "SMF (Session Management Function)"): gestion sessions PDU, allocation IP, QoS SLAs, roaming, charging, lawful intercept.
@@ -208,10 +212,9 @@
 #text(red, "gNB (gNodeB)"): divisé en CU (Central Unit) + DU (Distributed Unit)
 #text(red, "SBI (Service-Based Interface)"): architecture 5G Core orientée services, chaque NF expose API REST, remplace interfaces point-à-point.
 #text(red, "Réseau privé 5G"): tout logiciel sur COTS HW (hardware standard) — DU + CU + Packet Core déployés on-premise, connectés à un DN privé.
-#image("img/private_5g.png", width: 100%)
-#image("img/5g_sec_1.png", width: 100%)
-#text(red, "Sécurité 5G — 5G AKA"): acteurs: *AMF/SEAF* (contrôle d'accès core), *AUSF* (authentification), *UDM/ARPF/SIDF* (base abonnés + Ki). Phase 1 (initiation): UE envoie *SUCI* (identité chiffrée, remplace IMSI en clair) ou 5G-GUTI. Phase 2 (auth): échange RAND || AUTN || ngKSI, UE calcule RES, MME vérifie => dérive *K\_AUSF* => *K\_SEAF* => *K\_AMF* => clés NAS/RRC/UP.
-#image("img/5g_sec_2.png", width: 100%)
+#image("img/private_5g.png", width: 85%)
+#text(red, "Sécurité 5G — 5G AKA"): acteurs: *AMF/SEAF* (contrôle d'accès core), *AUSF* (authentification), *UDM/ARPF/SIDF* (base abonnés + Ki). *Phase 1 (initiation)*: UE envoie SUCI (identité chiffrée) ou 5G-GUTI; UDM convertit SUCI→SUPI et génère le vecteur d'auth. *Phase 2 (auth)*: AUSF hash XRES\* en HXRES\* et envoie RAND||AUTN||ngKSI à l'UE; UE vérifie AUTN (authentifie le réseau), calcule RES\*; AMF vérifie RES\* == HXRES\*, puis AUSF vérifie RES\* == XRES\* (double vérification); dérivation K\_AUSF => K\_SEAF => K\_AMF => clés NAS/RRC/UP.
+#image("img/5g_sec_1.png", width: 85%)
 #text(red, "SUCI (Subscriber Concealed Identifier)"): remplace IMSI en clair, IMSI chiffré avec clé publique de opérateur, protège vie privée contre IMSI catchers.
 #text(red, "Hiérarchie de clés 5G"): K => CK/IK => K\_AUSF => K\_SEAF => K\_AMF => K\_NASint/K\_NASenc (signalisation NAS) => K\_gNB => K\_RRCint/K\_RRCenc (radio) + K\_UPint/K\_UPenc (user plane).
 
@@ -245,7 +248,7 @@
   image("img/evolution_triangle.png", width: 100%),
   [#text(red)[Triangle des évolutions]: 3 axes sont Speed/Throughput (débit), Connection Density (nombre d'appareils) et Latency/Delay (délai). 2G/3G/4G surtout optimisé débit. 5G adresse les 3 dimensions simultanément: ultra-débit (eMBB), ultra-faible latence (URLLC) et connexion massive d'objets (mMTC).],
 )
-#image("img/evolution_full.png", width: 100%)
+#image("img/evolution_full.png", width: 95%)
 #text(red, "RAN — accès radio par génération"): chaque génération remplace complètement technologie radio. *2G (BTS/GERAN)*: canal radio partagé par découpage du temps (TDMA), des fréquences (FDMA) et de espace en secteurs (SDMA). *3G (NodeB/UTRAN)*: tous users émettent simultanément sur même fréquence, chacun identifié par code unique qui permet antenne de les démêler. *4G (eNodeB/E-UTRAN)*: fréquence découpée en centaines de sous-porteuses (OFDM),plusieurs flux données envoyés simultanément via antennes multiples (MIMO/MU-MIMO). *5G (gNodeB/NG-RAN)*: centaines d'antennes par station (massive MIMO), ondes millimétriques pour débits extrêmes mais portée courte, calcul distribué en bordure réseau.
 #text(red, "Core Network — évolution par strates"): cœur réseau évolue par couches en réutilisant existant. *2G/3G*: deux cœurs coexistent, un pour voix/SMS et un pour les données. *4G*: un seul cœur tout-IP, plus de circuit dédié, même voix passe par IP. *5G*: architecture cloud-native, plan de contrôle séparé du plan user pour + de flexibilité.
 #text(red, "Évolution sécurité 3G→4G→5G"): *Intégrité (vérification anti-falsification)*: f9/KASUMI (3G) → SNOW3G+AES (4G) → AES-CMAC+ZUC+HMAC-SHA256 (5G). *Chiffrement*: f8/KASUMI → SNOW3G+AES → AES+ZUC+SNOW3G. *Hiérarchie de clés*: une seule clé K (3G) → K+K_ASME (4G) → K+K_AMF+K_gNB (5G, plus compartimentée). *Protection du trafic user (UP)*: absente (3G) → présente (4G+5G). *Agilité cryptographique (capacité à changer d'algo)*: nulle (3G) → partielle (4G) → forte avec préparation post-quantique (5G). *Anonymat de l'identifiant*: IMSI transmis en clair (3G) → identifiant temporaire GUTI (4G) → SUCI chiffré asymétriquement, résistant au suivi (5G).
@@ -253,8 +256,8 @@
 = IMS Architecture
 
 #text(red, "IMS (IP Multimedia Subsystem)"): couche middleware au-dessus réseau IP qui fournit services multimédia (voix, vidéo, messagerie) indépendamment type accès (LTE, Wi-Fi, DSL). *Drivers clés d'IMS* : Access agnostic (fonctionne sur LTE, Wi-Fi, DSL…), services indépendants du réseau, architecture ouverte, multi-device, vendor independent.
-#image("img/ims_arch.png", width: 100%)
-#image("img/ims_network.png", width: 100%)
+#image("img/ims_arch.png", width: 85%)
+#image("img/ims_network.png", width: 85%)
 #text(red, "Access Layer"): réseaux d'accès hétérogènes.
 #text(red, "Session Control Layer"): cœur IMS, gestion des sessions SIP.
 #text(red, "P-CSCF (Proxy)"): premier point de contact de UE dans IMS, transfère requêtes SIP.
@@ -269,13 +272,13 @@
 #text(red, "IMPI (IMS Private User Identity)"): identité permanente et privée de abonné IMS, jamais transmise, utilisée uniquement pour auth.
 #text(red, "IMPU (IMS Public User Identity)"): identité publique de abonné IMS, adresse SIP ou tel-URI utilisée pour joindre abonné (équivalent numéro téléphone).
 #text(red, "IP-CAN (IP Connectivity Access Network)"): réseau qui fournit connectivité IP entre UE et cœur IMS. peut être LTE, Wi-Fi, DSL ou câble. ce qui rend IMS *access-agnostic* : même cœur IMS/SIP fonctionne quel que soit type d'accès.
-#image("img/ipcan.png", width: 100%)
+#image("img/ipcan.png", width: 85%)
 
 = VoLTE
 
 #text(red, "VoLTE (Voice over LTE)"): transport voix sur réseau 4G LTE en tout-IP via IMS, au lieu d'un circuit dédié, la voix est un flux paquet SIP comme les données. *Avantages*: HD Voice, établissement appel rapide, coexistence voix+data sur même connexion LTE. *Chaîne de bout en bout* : 1. UE (SIP-enabled): smartphone avec SIP User Agent — gère la signalisation SIP. 2. LTE Network: transport radio + EPC — achemine paquets voix/signalisation. 3. IMS Core: traite la signalisation SIP, gère la session d'appel. 4. Voice Core / PSTN: si l'appelé est sur le réseau fixe ou une autre génération.
-#image("img/volte_1.png", width: 100%)
-#image("img/volte_2.png", width: 100%)
+#image("img/volte_1.png", width: 85%)
+#image("img/volte_2.png", width: 85%)
 *Changements réseau pour supporter VoLTE* :
 #text(red, "SGW/PGW"): activer bearers dédiés (QCI 1 et 5), pool IP IMS, routage vers P-CSCF.
 #text(red, "MME"): configurer SRVCC, sélection gateway IMS, politique de paging VoLTE, validation QCI 1 et 5.
