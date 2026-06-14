@@ -18,13 +18,23 @@
 #text(red, "TDMA"): TODO
 #text(red, "Roaming"): TODO
 
+= Réseaux et cellules
+
+#text(red, "Principe cellulaire"): Spectre radio est ressource limitée et partagée => Servir des millions d'utilisateurs ? => découper zone géographique en cellules hexagonales. *Réutilisation de fréquences*: même fréquence peut être réutilisée dans des cellules non-adjacentes. Plus cellules petites => réutiliser fréquences plus souvent => donc capacité totale du réseau plus grande, mais plus l'infrastructure (antennes, câblage, énergie) coûte cher.
+#text(red, "Handover (Handoff)"): Mobile se déplace => passe d'une cellule à une autre => réseau transfère communication à la cellule voisine sans coupure perceptible.
+#text(red, "Types de cellules (du plus petit au plus grand)"): Différentes tailles pour optimiser couverture et capacité selon environnement. Plus cellule petite, plus déployée dans zones denses avec beaucoup utilisateurs concentrés (ville = petite cellule, rural = grande cellule).
+*Femtocell*: zone domestique ou bureau, ~8--16 utilisateurs, très petite portée, indoor.
+*Picocell*: zone enterprise ou forte densité, ~16 utilisateurs, portée légèrement supérieure.
+*Microcell/Metrocell*: zone dense et indoor (centres commerciaux, gares), ~64 utilisateurs.
+*Meadowcell/Macrocell*: zone urbaine extérieure, 50--200 utilisateurs, grande portée.
+
 = Autres
 
-#text(red, "Entropie"): mesure la quantité d'information moyenne (en bits) =~ le degré d'incertitude sur le prochain symbole émis #text(purple, $H(X) = −∑ p(x) · log₂(p(x))$)
-#text(red, "Shannon-Hartley"): Débit maximal auquel il existe un code permettant un taux d'erreur arbitrairement faible = #text(purple, $C = B_p · log_2(1 + P_"signal"/P_"bruit")$), $B_p$ = bande passante (Hz), $P$ = puissance (Watts) ; SNR = rapport signal/bruit — plus SNR est élevé, plus la capacité C est grande
-#text(red, "Théorème 1"): On peut compresser jusqu’à l’Entropie
-#text(red, "Théorème 2"): Si le débit est inférieur à la capacité du canal, le taux d’erreur peut tendre vers zéro moyennant un code correcteur
-#text(red, "Théorème 3"): La sécurité parfaite si : La clef est au moins aussi longue que le message, la clef est choisie uniformément au hasard et n'est utilisée qu'une seule fois
+#text(red, "Entropie"): mesure quantité information moyenne par symbole (en bits). Intuition: si prochain symbole est toujours prévisible => entropie faible (peu d'information). Si tout est imprévisible, entropie maximale. #text(purple, $H(X) = −∑ p(x) · log_2(p(x))$)
+#text(red, "Shannon-Hartley"): fixe débit *maximal théorique* d'un canal. Intuition: plus canal est large (grande bande passante $B_p$) et plus signal est fort par rapport au bruit (grand SNR), plus on peut transmettre de données. #text(purple, $C = B_p · log_2(1 + "SNR")$), $B_p$ = bande passante (Hz), SNR = rapport signal/bruit (sans unité). Consequence: doubler la bande passante double la capacité; doubler le SNR l'augmente seulement de 1 bit/s/Hz.
+#text(red, "Théorème 1 (compression)"): On peut compresser une source jusqu'à son entropie, mais pas en dessous (entropie est limite théorique compression sans perte).
+#text(red, "Théorème 2 (correction d'erreurs)"): Si débit d'envoi est inférieur à capacité C du canal, il existe code correcteur qui réduit taux d'erreur aussi proche de zéro qu'on veut (même sur canal bruité).
+#text(red, "Théorème 3 (sécurité parfaite)"): Sécurité parfaite est possible si: clef est au moins aussi longue que message, clef est choisie uniformément au hasard et utilisée seule fois. Principe du *One-Time Pad*.
 #text(red, "Contraintes Economique"): Time to Market, Economy of Scale, Economy of Scope, Energy optimization, Autonomy, User Centric, User Experience, Ubiquitous.
 #text(red, "Contraintes Techniques"): Couverture globale, Convergence IP, Convergence Fixe_Mobile, Zero_Trust Security, Cross-Layring Security, Couverture Globale, Latence et Gigue, Débit, SDN, Réseaux Privés Open-RAN.
 // TODO to remove if not enough space
@@ -247,11 +257,6 @@
 #text(red, "Evolved Packet System (EPS)"): = Réseau 4G séparé en RAN et CN.
 #text(red, "Radio Access Network (RAN)"): User Equipement (UE), communication sans fil (Air Interface), station de base evolved Node B (eNodeB).
 #text(red, "Core Network (CN)"): Coeur du réseau = Evolved Packet Core (EPC), basé sur IP, plus de commutation circuit tout est packet switched.
-#text(red, "Taille de cellules")Différentes tailles pour optimiser la couverture et la capacité selon l'environnement. Plus elle est petite, plus elle est déployé dans zones denses avec beaucoup d'utilisateurs concentrés.
-#text(red, "Femtocell"): Usage domestique/entreprise, 8-16 users, petite portée, indoor
-#text(red, "Picocell"): Entreprise et zones à forte densités, portée légèrement supérieur à Femtocell
-#text(red, "Microcell/Metrocell"): Zone à forte densité et indoor, ~64 users
-#text(red, "Meadowcell/Macrocell"): Zones urbaines extérieurs, 50-200 users, grande portée
 #image("img/lte_arch.png", width: 100%)
 #text(red, "Long Term Evolution (LTE)"): technologie 4G, évolution de l'UMTS, tout IP, plus rapide et plus efficace que les générations précédentes.
 #text(red, "E-UTRAN (Radio)"): Evolved Universal Terrestrial Radio Access Network, partie radio du réseau LTE. Gère l'interface air entre l'UE et le réseau, sans contrôleur centralisé (RNC supprimé vs UMTS). *Composé de*: eNodeB.
@@ -327,27 +332,33 @@ Priorités : VoLTE signaling (1er, QCI 5) → voix (QCI 1) → gaming/V2X (QCI 3
 
 = Evolution
 
-Naming is driven by marketing, not standards. Each generation ~10 years apart.
-Tendances clés :
-*Circuit Switched → Packet Switched*: dès la 4G, tout est IP, la voix passe par VoLTE (voix sur paquets)
-*NFV / SDN*: les fonctions réseau autrefois câblées en hardware sont maintenant des logiciels virtualisés (ex. un smartphone remplace caméra, radio, GPS, lecteur…)
 #grid(
-  columns: (auto, 1fr),
+  columns: (1fr, auto),
   gutter: 4pt,
+  [
+    #text(red)[Tendances clés]:
+    *Circuit Switched => Packet Switched*: dès 4G, tout est IP, voix passe par VoLTE (voix sur paquets). Avant: appel réservait circuit dédié de bout en bout pour toute sa durée (gaspillage bande passante). Maintenant: voix est découpée en paquets IP comme les données web.
+    *NFV / SDN*: Fonctions réseau autrefois en hardware dédié deviennent logiciels (VNF = Virtual Network Functions) qui s'exécutent sur serveurs standards. Avantages: déploiement rapide, scalabilité, coût réduit.
+  ],
   table(
     columns: (auto, auto, auto, auto),
     inset: 3pt,
     stroke: 0.4pt,
     align: center,
     table.header[*Gen*][*Focus*][*Voix*][*Data*],
-    [1G (1980)], [Analogique], [CS], [—],
+    [1G (1980)], [Analogique], [CS], [--],
     [2G (1990)], [Numérique], [CS], [PS],
     [3G (2000)], [Data], [CS], [PS],
     [4G (2010)], [Débit], [PS], [PS],
     [5G (2020)], [Latence], [PS], [PS],
     [6G (2030)], [Haute fréq.], [PS], [PS],
   ),
+)
+#grid(
+  columns: (2fr, 1fr),
+  gutter: 4pt,
   image("img/evolution_triangle.png", width: 100%),
+  [#text(red)[Triangle des évolutions]: 3 axes sont Speed/Throughput (débit), Connection Density (nombre d'appareils) et Latency/Delay (délai). 2G/3G/4G surtout optimisé débit. 5G adresse les 3 dimensions simultanément: ultra-débit (eMBB), ultra-faible latence (URLLC) et connexion massive d'objets (mMTC).],
 )
 #image("img/evolution_full.png", width: 100%)
 *RAN* (technologie d'accès radio, remplacée à chaque génération) :
@@ -488,7 +499,8 @@ Tendances clés :
   [ADD_ADDR], [Informer l'autre extrémité d'une nouvelle adresse IP disponible — peut déclencher un MP_JOIN],
   [MP_PRIO], [Demander un changement de priorité d'un chemin — ex: préférer Wi-Fi à 4G],
   [Data FIN], [Terminer la connexion MPTCP globalement (équivalent FIN TCP, applicable à tous les sous-flux)],
-  [REMOVE_ADDR], [Signaler qu'une adresse IP n'est plus disponible — déclenche la fermeture du sous-flux associé (complément de ADD_ADDR)],
+  [REMOVE_ADDR],
+  [Signaler qu'une adresse IP n'est plus disponible — déclenche la fermeture du sous-flux associé (complément de ADD_ADDR)],
 )
 #text(red, "MPTCP — Cas d'usage"): *Mobile handover (iOS/Android)*: maintient les sessions lors du basculement Wi-Fi↔LTE sans reconnexion — Apple utilise MPTCP pour Siri, Maps et Music depuis *iOS 7*. *Agrégation de bande passante*: Wi-Fi + cellulaire simultanément pour cumuler les débits. *Roaming Wi-Fi entreprise*: handover transparent entre points d'accès sans coupure de session.
 #text(red, "MPTCP — Retransmissions"): *Perte sur un sous-flux*: fast retransmit effectué sur le *même sous-flux* (comme TCP standard). *Timeout expiré*: réévaluation — le segment peut être retransmis sur un *autre sous-flux* disponible. *Perte d'un sous-flux entier*: toutes les données non-acquittées sont retransmises sur les autres sous-flux.
