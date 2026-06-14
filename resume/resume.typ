@@ -131,7 +131,7 @@
 
 = AMPS (1G)
 
-#text(red, "Advanced Mobile Phone Service (AMPS)"): première génération de système téléphonie moderne à cellule. *Aucune sécurité* : identification via ESN (Electronic Serial Number) + CTN (Cellular Telephone Number) en clair, communications analogiques non chiffrées. Vulnérabilités : écoute passive (eavesdropping) et clonage de mobile.
+#text(red, "Advanced Mobile Phone Service (AMPS)"): 1ère génération système téléphonie moderne à cellule (1G). *No security*: identification via ESN (Electronic Serial Number) + CTN (Cellular Telephone Number) en clair, communications analogiques non chiffrées. *Vulnérabilités*: écoute passive (n'importe qui avec radio peut écouter appel) et clonage (copier ESN+CTN sur un autre appareil => appels facturés à victime).
 
 = GSM (2G)
 
@@ -141,7 +141,7 @@
 #text(red, "GSM — Utilisations"): *Roaming*: itinérance internationale possible grâce au standard mondial (basculement automatique entre opérateurs partenaires). *Prépayé*: cartes SIM sans abonnement. *IoT et SMS M2M*: capteurs et équipements industriels communiquant par SMS entre machines (M2M = Machine to Machine) sur le réseau GSM. *Géolocalisation par cellule*: localisation approximative via l'identifiant de la cellule (Cell ID) sans GPS — précision de quelques centaines de mètres à quelques km selon la densité des antennes. *Internet Mobile*: données paquets via GPRS/EDGE.
 
 #image("img/gsm_arch.png", width: 100%)
-#text(red, "Global System for Mobile Communications (GSM)"): Famile de standards pour décrire les protocoles 2G (réseau numérique voix + SMS, données lentes, voix en Circuit Switched). Basée sur TDMA radio access et PCM trunking. Utilise SS7 signaling *Securité*: Authentication et encryption => vise à donnée confidentialité et anonymité avec une authentification cliente forte pour protéger les opérateurs contre fraudeurs. Prévenir opérateur compromette la sécurité d'un autre opérateur par inadvertance ou sous pression concurentielle.
+#text(red, "Global System for Mobile Communications (GSM)"): Famille standards 2G (réseau numérique voix + SMS, données lentes, voix en Circuit Switched). Basée sur TDMA radio access et PCM trunking. Utilise SS7 signaling. *Objectifs sécurité*: confidentialité + anonymité sur lien radio, authentification forte du client (protéger opérateur contre fraude à la facturation), empêcher un opérateur compromettre sécurité d'un autre (inadvertance ou pression concurrentielle).
 #text(red, "Signalling System #7 (SS7)"): suite de protocoles utilisée par les opérateurs télécom pour communiquer entre eux. modèle de confiance mutuelle entre opérateurs, *aucune authentification intégrée*. Accès achetable pour quelques centaines de dollars/mois, nombreux hubs SS7 non sécurisés sur le web.
 #text(red, "RAN (Radio Access Network)"): partie radio du réseau GSM — ensemble des équipements gérant la communication sans fil entre les mobiles et le cœur du réseau. Ne stocke pas les identifiants des abonnés. *Composé de*: BTS (antennes radio au contact direct des mobiles, gèrent l'interface air) et BSC (contrôleur coordonnant plusieurs BTS, gère l'allocation des canaux radio et les handovers).
 #text(red, "Base Transceiver Station (BTS)"): antenne radio, communique avec le mobile via l'interface air. *Stocke*: Kc, A5.
