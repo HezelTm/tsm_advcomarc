@@ -578,14 +578,14 @@ Priorités : VoLTE signaling (1er, QCI 5) → voix (QCI 1) → gaming/V2X (QCI 3
 #image("img/auth_overview.png", width: 100%)
 #text(red, "Open System Authentication"): établit une association IEEE 802.11 sans authentification. Équivalent à brancher un câble réseau : n'importe quel client peut se connecter.
 #image("img/open_system_authentication.png", width: 100%)
-#text(red, "Wired Equivalent Privacy (WEP)"): authentification par clé partagée, chiffrement RC4. *Problèmes de sécurité* : IV de seulement 24 bits — collision d'IV inévitable (le même keystream RC4 réutilisé pour chiffrer des textes différents), permettant des attaques statistiques pour retrouver le plaintext. CRC-32 linéaire et non cryptographique — manipulable pour forger un ICV valide sur un faux message.
+#text(red, "Wired Equivalent Privacy (WEP)"): authentification par clé partagée, chiffrement RC4. *Problèmes de sécurité* : IV de seulement 24 bits (paradoxe anniversaire => collision). CRC-32 linéaire (non cryptographique) => attaquant peut modifier message chiffré ET recalculer ICV (Integrity Check Value) valide sans connaître clé => forge message indétectable.
 #image("img/wep.png", width: 100%)
 #image("img/rc4.png", width: 100%)
 #text(red, "STA"): wireless client
 #text(red, "Access Point (AP)"): point d'accès Wi-Fi — joue le rôle d'*Authenticator* dans 802.1X : contrôle l'accès au réseau et relaie les messages EAP entre le client et le serveur d'authentification.
 #text(red, "Authentication Server (AS)"): base de données d'authentification (RADIUS ou Diameter) — vérifie les credentials du client et autorise ou refuse l'accès.
 #text(red, "802.1X"): protocole de contrôle d'accès réseau par port (NAC), authentification mutuelle. 3 entités : *Supplicant* (client Wi-Fi), *Authenticator* (AP), *Authentication Server* (RADIUS/Diameter). Utilise EAP comme framework d'authentification — méthodes : EAP-MD5, EAP-TLS, EAP-TTLS, PEAP, EAP-FAST, EAP-SIM, EAP-AKA. Fonctionne au niveau réseau (pas liaison de données).
-#text(red, "EAP tunnelisé (TTLS, PEAP, FAST)"): approche générale — TLS établit d'abord un tunnel sécurisé (auth serveur via certificat), puis une méthode d'auth interne (inner EAP) s'exécute à l'intérieur du tunnel. Avantage : le client n'a pas besoin de certificat pour la méthode interne. PMK dérivé des nonces et du secret DH/session TLS.
+#text(red, "EAP tunnelisé (TTLS, PEAP, FAST)"): approche en 2 temps. *1)* TLS établit un tunnel chiffré (serveur s'authentifie via certificat). *2)* méthode d'auth client (mot de passe, token) s'exécute à l'intérieur du tunnel. *Avantage*: client pas besoin certificat (contrairement à EAP-TLS), clé session Wi-Fi (PMK) automatiquement dérivée à l'issue de l'échange TLS.
 #image("img/eap_auth.png", width: 100%)
 #table(
   columns: (auto, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
@@ -601,21 +601,20 @@ Priorités : VoLTE signaling (1er, QCI 5) → voix (QCI 1) → gaming/V2X (QCI 3
   [Déploiement], [Facile], [Difficile], [Modéré], [Modéré], [Modéré], [Modéré],
   [Sécurité Wi-Fi], [Faible], [Très haute], [Haute], [Haute], [Haute], [Haute si MDP fort],
 )
-#text(red, "Clefs 802.1x"): hiérarchie de clés dérivées : *Root Key (Master Key)* → toutes les autres clés en sont dérivées. *PMK (Pairwise Master Key)* → génère les clés unicast (256 bits, issu de AAA Key ou PSK). *GMK (Group Master Key)* → génère les clés multicast/broadcast. *PTK (Pairwise Transient Key)* → chiffrement + intégrité des données unicast, protège aussi le 4-way handshake. Dérivé par : #text(purple, $"PTK" = "PRF"("PMK", "ANonce", "SNonce", "AP MAC", "STA MAC")$) (384 bits AES-CCMP, 512 bits TKIP). *GTK (Group Temporal Key)* → distribué via group-key handshake, chiffre le trafic multicast/broadcast. *Session Keys* → clés finales effectivement utilisées pour le chiffrement.
+#text(red, "Clefs 802.1x"): hiérarchie de clés dérivées — chaque niveau protège le niveau suivant. *Root Key (Master Key)* → toutes les autres clés en sont dérivées. *PMK (Pairwise Master Key)* → 256 bits, issu du AAA Key (enterprise) ou PSK (personnel). *GMK (Group Master Key)* → génère les clés de groupe. *PTK (Pairwise Transient Key)* → clé de session *paire* (entre la STA et l'AP uniquement — unicast = trafic à un seul destinataire), protège aussi le 4-way handshake. Dérivé par : #text(purple, $"PTK" = "PRF"("PMK", "ANonce", "SNonce", "AP MAC", "STA MAC")$) (384 bits AES-CCMP, 512 bits TKIP). *GTK (Group Temporal Key)* → clé *commune* à toutes les STAs du réseau, chiffre le trafic broadcast (tous) et multicast (groupe). *Session Keys* → clés finales effectivement utilisées pour le chiffrement.
 #image("img/key_802.-1.png", width: 100%)
 #image("img/802-1_key_management.png", width: 100%)
 #image("img/key_management_4_way_handshake.png", width: 100%)
 #image("img/group_key_handshake.png", width: 100%)
-#text(red, "Wireless Network"): Wireless client is the supplicant, AP is the authenticator.
 #text(red, "Robust Security Network (RSN / 802.11i)"): définit une RSNA (RSN Association) entre stations. 3 piliers : (1) *Chiffrement* via CCMP (AES en mode CTR + CBC-MAC pour l'intégrité) — TKIP optionnel pour compatibilité. (2) *Gestion des clés* via 4-way handshake (dérive le PTK) + group-key handshake (distribue le GTK). (3) *Authentification* via PSK (personnel) ou 802.1X/EAP (entreprise).
 #image("img/ptk.png", width: 100%)
 #text(red, "Cipher Block Chaining (CBC)")
 #image("img/cbc.png", width: 100%)
-#text(red, "CCMP AES Encryption/MIC")
+#text(red, "CCMP (Counter Mode CBC-MAC Protocol)"): protocole de chiffrement Wi-Fi de WPA2, basé sur AES. *Chiffrement* (AES-CTR) : AES génère un keystream à partir d'un compteur incrémental XORé avec les données — chaque paquet a un keystream unique. *Intégrité* (AES-CBC-MAC) : calcule un MIC de 8 octets sur le header + données — toute modification du paquet est détectée.
 #image("img/ccmp_aes_encryption_mic.png", width: 100%)
 #text(red, "Wi-Fi Protected Access (WPA)"): amélioration transitoire de WEP (avant 802.11i/WPA2). Améliorations : authentification via 802.1X/RADIUS (entreprise) ou passphrase PSK (personnel), hiérarchie de clés dérivée du master key, IV doublé à 48 bits (vs 24 bits WEP), intégrité via algorithme *Michael* (MIC). Session = authentification + 4-way handshake (génère la hiérarchie de clés) + données chiffrées via *TKIP* (RC4 + Michael).
 #image("img/wpa_personal_vs_enterprise.png", width: 100%)
-#text(red, "TKIP (Temporal Key Integrity Protocol)"): amélioration de WEP rétrocompatible (même matériel RC4). *Structure PTK* (512 bits) : KCK (128 bits, intégrité handshake) + KEK (128 bits, chiffre transport GTK) + TK (256 bits = Temporal Encryption Key + MIC Key 1 + MIC Key 2). *Fonctionnement* : clé unique par paquet via key mixing (IV + clé maître → clé RC4 par paquet), IV étendu à 48 bits (vs 24 bits WEP → évite les collisions), intégrité via algorithme *Michael* (MIC). *Faiblesses* : rétrocompatibilité limite la sécurité, vulnérable à l'attaque *Beck-Tews* (2008). Déprécié — remplacé par CCMP/AES dans WPA2.
+#text(red, "TKIP (Temporal Key Integrity Protocol)"): amélioration de WEP rétrocompatible (même matériel RC4). *Structure PTK* (512 bits) : KCK (128 bits, intégrité handshake) + KEK (128 bits, chiffre transport GTK) + TK (256 bits = Temporal Encryption Key + MIC Key 1 + MIC Key 2). *Fonctionnement* : clé unique par paquet via key mixing (IV + clé maître → clé RC4 par paquet), IV étendu à 48 bits (vs 24 bits WEP → évite les collisions), intégrité via algorithme *Michael* (MIC). *Faiblesses* : rétrocompatibilité limite la sécurité, vulnérable à l'attaque *Beck-Tews* (2008, exploite les faiblesses résiduelles de RC4 pour décrypter et réinjecter des paquets courts). Déprécié — remplacé par CCMP/AES dans WPA2.
 #image("img/wpa_tkip_encryption.png", width: 100%)
 #image("img/ptk_for_tkip.png", width: 100%)
 #text(red, "WPA2 (802.11i, 2004)"): standard Wi-Fi Alliance basé sur IEEE 802.11i — marque Wi-Fi certifiée après 2006. Même 4-way handshake et hiérarchie de clés que WPA, mais remplace TKIP par *CCMP/AES* : AES en mode CTR pour le chiffrement, AES en mode CBC-MAC pour l'intégrité (MIC). *PTK AES-CCMP* (384 bits) : KCK (128 bits, intégrité du handshake) + KEK (128 bits, chiffre le transport de la GTK) + TK (128 bits, chiffrement + intégrité des données). TK plus court que TKIP (128 vs 256 bits) car CBC-MAC gère l'intégrité avec une seule clé, sans besoin de 2 clés MIC séparées.
@@ -626,14 +625,14 @@ Priorités : VoLTE signaling (1er, QCI 5) → voix (QCI 1) → gaming/V2X (QCI 3
 #text(red, "PMF (Protected Management Frames)"): protège les trames de management (deauthentication, disassociation) en les authentifiant et chiffrant — empêche les attaques de déconnexion forcée (deauth attacks) qui exploitaient le fait que ces trames étaient en clair dans WPA/WPA2.
 #text(red, "OWE (Opportunistic Wireless Encryption)"): remplace les réseaux Wi-Fi ouverts sans mot de passe. Chiffre le trafic même sans authentification via un échange Diffie-Hellman — chaque client obtient une clé de session unique. Pas de protection contre les rogue AP, mais élimine l'écoute passive sur les réseaux publics.
 #text(red, "Purpose of enhanced authentication mechanisms"): identifier les appareils de façon sécurisée avant d'accorder l'accès, empêcher les accès non autorisés, protéger la confidentialité et l'intégrité des données en transit, corriger les failles de WEP, WPA et WPA2.
-#text(red, "Discovery Message Exchange (Robust Security Network)")
+#text(red, "Discovery Message Exchange (RSN)"): STA scanne les APs => AP annonce ses capabilities RSN (chiffrement + méthodes d'auth supportés) => STA choisit et négocie suites cryptographiques avant de s'associer.
 #image("img/discovery_message_exchange.png", width: 100%)
-#text(red, "Operational phases (Robust Security Network)")
+#text(red, "Operational phases (RSN)"): 4 phases séquentielles : (1) *Discovery* des capabilities RSN (chiffrement + auth supportés), (2) *Authentification* 802.1X/EAP + dérivation du PMK, (3) *Key Management* 4-way handshake (dérive PTK) + group-key handshake (distribue GTK), (4) *Data Protection* via CCMP ou TKIP.
 #image("img/operational_phase.png", width: 100%)
 #text(red, "Key Derivation/Key Partitioning"): la dérivation de clés génère plusieurs clés cryptographiques à partir d'une valeur source via une KDF (Key Derivation Function). Avantage : si une clé dérivée est compromise, la clé maître et les autres clés restent sécurisées. *PMK (256 bits)* est au sommet de la hiérarchie — dérivé soit du *AAA Key* (enterprise, issu de l'auth RADIUS/EAP) soit du *PSK* (personnel, passphrase). Toutes les clés de session (PTK, GTK) en sont dérivées indirectement.
 #image("img/kdf.png", width: 100%)
 #image("img/pairwise_key.png", width: 100%)
-#text(red, "Offline Dictionary Attack")
+#text(red, "Offline Dictionary Attack"): attaque contre WPA/WPA2-PSK — l'attaquant capture le 4-way handshake Wi-Fi (échange visible dans l'air), puis teste localement des milliers de mots de passe (dictionnaire ou brute force) sans aucune interaction réseau jusqu'à trouver celui qui reproduit le handshake capturé. *WPA3/SAE protège* : chaque tentative SAE nécessite un échange réseau → attaque offline impossible.
 #image("img/offline_dict_attack.png", width: 100%)
 
 // CONSOLI
