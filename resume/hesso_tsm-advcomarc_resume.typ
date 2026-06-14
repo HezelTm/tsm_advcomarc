@@ -12,12 +12,6 @@
   v(0.2em, weak: true)
 }
 
-#text(red, "")
-#text(purple, $$)
-
-#text(red, "TDMA"): TODO
-#text(red, "Roaming"): TODO
-
 = Réseaux et cellules
 
 #text(red, "Principe cellulaire"): Spectre radio est ressrc limitée et partagée => Servir des millions d'users ? => découper zone géographique en cellules hexagonales. *Réutilisation de fréquences*: même fréquence peut être réutilisée dans des cellules non-adjacentes. + cellules petites => réutiliser fréquences + souvent => donc capacité totale du réseau + grande, mais + l'infrastructure (antennes, câblage, énergie) coûte cher.
