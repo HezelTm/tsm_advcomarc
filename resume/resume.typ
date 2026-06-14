@@ -70,6 +70,7 @@
 )
 #text(red, "H.323"): ancien standard pour VoIP entreprise. Encodage binaire ASN.1 (compact mais illisible), TCP uniquement (récupération erreurs déléguée à TCP). Négociation capabilities via H.245 (riche mais complexe à implémenter). Pas messagerie instantanée. Sécurité limitée. Présent dans systèmes legacy.
 #text(red, "Session Initiation Protocol (SIP)"): Remplace H.323. Protocole signalisation inspiré de HTTP/SMTP pour établir, modifier et terminer sessions multimédia (VoIP, vidéo). Encodage texte lisible, transport TCP/UDP/SCTP (récupération erreurs autonome). Délègue description paramètres media (codecs, ports) à SDP (capabilities simples vs H.245). Sécurité via TLS + SRTP. Messagerie instantanée supportée. Architecture pair-à-pair avec serveurs optionnels (proxy, registrar). *UAC (User Agent Client)*: entité SIP qui initie requêtes (ex: l'appelant envoie INVITE). *UAS (User Agent Server)*: entité SIP qui reçoit et répond aux requêtes (ex: l'appelé répond 200 OK). Endpoint généralement les deux à la fois.
+*Failles sécurité SIP*: (1) écoute/interception de signalisation si SIP utilisé sans TLS ; (2) écoute des médias si flux RTP non protégé par SRTP ; (3) DoS par flooding INVITE/REGISTER (saturation proxy/serveur) ; (4) MITM et modification de signalisation si intégrité et authentification ne sont pas assurées.
 
 = Fréquence
 
@@ -92,9 +93,11 @@
 *Basse fréquence*: pénètre mieux murs, portée + grande, + d'users par cellule
 *Haute fréquence*: atténuation élevée, se reflète sur mur, mauvaise pénétration indoor => mais bande passante + large => débits + élevés
 
-= AMPS(1G)/GSM(2G)/UMTS(3G)/LTE(4G)
+= 1G (AMPS)
 
 #text(red, "Advanced Mobile Phone Service (AMPS)"): 1ère génération système téléphonie moderne à cellule (1G). *No security*: identification via ESN (Electronic Serial Number) + CTN (Cellular Telephone Number) en clair, communications analogiques non chiffrées. *Vulnérabilités*: écoute passive (n'importe qui avec radio peut écouter appel) et clonage (copier ESN+CTN sur un autre appareil => appels facturés à victime). *Limites*: Saturation de l'analogique: réseaux analogiques ne peuvent + absorber demande croissante abonnés (spectre limité, capacité insuffisante). Incompatibilité aux frontières: chaque pays utilise propre standard, aucun roaming international possible. Aucune confidentialité.
+= 2G (GSM)
+
 #text(red, "Global System for Mobile Communications (GSM)"): Famille standards 2G (réseau numérique voix + SMS, données lentes, voix en Circuit Switched). Basée sur TDMA radio access et PCM trunking. Utilise SS7 signaling. *Objectifs sécurité*: confidentialité + anonymité sur lien radio, authentification forte du client (protéger opérateur contre fraude à la facturation), empêcher un opérateur compromettre sécurité d'un autre (inadvertance ou pression concurrentielle). *Forces*: 1ère architecture mobile numérique, introduction carte SIM, standard mondial (roaming international), base technologique générations 3G/4G/5G. *Limites perf.*: débits faibles, latence élevée incompatible avec applications temps réel. *Failles sécurité*: auth. unilatérale (mobile ne vérifie pas réseau); A5/1 et A5/2 cassables cryptographiquement; COMP128 vulnérable side-channel; IMSI transmis en clair lors de l'enregistrement; chiffrement radio-only téléphone-BTS (cœur réseau opérateur non chiffré); conçu 1980, difficile à adapter menaces modernes.
 #text(red, "GSM — Positionnement OSI et alternatives"): opère sur 3 couches modèle OSI. *Couche 1 (Physique)*: interface radio entre téléphone et antenne BTS (modulation, transmission bits sur interface air). *Couche 2 (Liaison)*: protocole LAPDm (Link Access Protocol), contrôle erreurs et fiabilité liaison radio. *Couche 3 (Réseau)*: RR (Radio Resrc Management): gestion canaux radio et handovers, MM (Mobility Management): localisation, authentification, gestion de l'identité (IMSI/TMSI), CM (Connection Management): établissement appels, SMS, données.
 #text(red, "GSM — Utilisations"): *Roaming*: itinérance internationale possible grâce standard mondial (basculement automatique entre opérateurs). *Prépayé*: cartes SIM sans abo. *IoT et SMS M2M*: capteurs/équipements industriels communiquant par SMS entre machines. *Géolocalisation par cellule*: localisation approximative via id cellule sans GPS, précision =\~ centaines mètres à quelques km selon densité des antennes. *Internet Mobile*: données paquets via GPRS/EDGE.
@@ -108,7 +111,7 @@
 #text(red, "Operation and Maintenance Center (OMC)"): supervision et maintenance du réseau.
 #text(red, "Home Location Register (HLR) (Database)"): base permanente abonnés , contient profil, services autorisés et localisation courante. *Stocke*: IMSI, Ki, A3, A8
 #text(red, "Visitor Location Register (VLR) (Database)"): copie locale HLR pour abonnés présents dans zone du MSC (évite requêtes HLR constantes). *Stocke*: IMSI, TMSI, Kc, RAND, SRES.
-#text(red, "auth Center (AuC) (Database)"): génère triplets de sécurité. *Stocke*: IMSI, Ki, A3, A8.
+#text(red, "auth Center (AuC) (Database)"): génère des triplets de sécurité (RAND, SRES, Kc) pour chaque abonné: RAND = challenge aléatoire, SRES = A3(Ki, RAND) = réponse attendue du mobile, Kc = A8(Ki, RAND) = clé de chiffrement radio. Précalculés en lot et transmis au VLR/MSC. Ki ne quitte jamais l'AuC. *Stocke*: IMSI, Ki, A3, A8.
 #text(red, "Equipment Identity Register (EIR) (Database)"): vérifie si équipement (IMEI) autorisé, volé ou défectueux.
 #text(red, "User Equipement (UE)"): terminal mobile abonné, combine matériel physique et carte SIM. *Composé de*: ME, SIM, IMEI, Ki, IMSI, TMSI, MSISDN, LAI, PTN.
 #text(red, "Mobile Equipment (ME)"): appareil physique, identifié par IMEI.
@@ -138,6 +141,8 @@
 #image("img/sms_1.png", width: 85%)
 #image("img/sms_2.png", width: 85%)
 #text(red, "Attack: SS7 SMS Interception (Man-in-the-Middle)"): Similaire à MITM, intercepte SMS (ex. codes 2FA). *1)*: attaquant enregistre MSISDN de victime sur faux MSC via SS7 => vrai HLR met à jour localisation vers faux MSC => (C) vrai HLR demande vrai MSC de libérer mémoire. *2)*: banque envoie SMS => le SMS-C demande localisation au HLR => HLR répond avec adresse du faux MSC => SMS-C achemine SMS vers attaquant.
+= 3G (UMTS)
+
 #text(red, "UMTS (Universal Mobile Telecommunications System)"): technologie téléphonie mobile 3G, successeur GSM. Réutilise principes sécurité GSM (module hardware amovible, chiffrement radio, protection identité) mais corrige failles: *USIM* remplace SIM (authentification mutuelle), confiance limitée au réseau visité, clés/données d'auth ne transitent + en clair, chiffrement obligatoire, *intégrité des données* ajoutée. Corrige aussi attaques par fausse station de base.
 #image("img/umts.png", width: 85%)
 #text(red, "Radio Network Controller (RNC)"): remplace BSC, contrôle plusieurs NodeB, gère handover, allocation ressources radio et chiffrement.
@@ -158,6 +163,8 @@
 #image("img/f9.png", width: 85%)s
 #text(red, "f8 — Chiffrement"): chiffrement par flot des données.
 #image("img/f8.png", width: 85%)
+= 4G (LTE)
+
 #grid(
   columns: (1fr, auto),
   gutter: 4pt,
@@ -287,7 +294,10 @@
 
 = TCP/UDP/SCTP/MPTCP
 
-#text(red, "TCP"): protocole de transport fiable, orienté flux d'octets (bytestream), identifié par (IP_src, IP_dst, Port_src, Port_dst). Contrôle de congestion. *Limites*: head-of-line blocking (paquet livré dans l'ordre, si paquet n perdu, paquet n+i bloqué tant que paquet n pas recu), pas de multi-homing, connexion liée à paire IP/Port (si IP change, connexion doit être réétablie), vulnérable DoS (SYN flood). *ECMP (Equal Cost Multipath)*: mécanisme routage qui distribue connexions sur plusieurs chemins de coût égal via hashage: Hash(IP_src, IP_dst, Protocole, Port_src, Port_dst) mod nb_sorties. tous paquets même connexion TCP suivent même chemin, deux connexions différentes peuvent emprunter chemins distincts. Conséquence: connexion TCP standard peut pas exploiter plusieurs chemins simultanément.
+#text(red, "TCP"): protocole de transport fiable, orienté flux d'octets (bytestream), identifié par (IP_src, IP_dst, Port_src, Port_dst). Contrôle de congestion. *Limites*: head-of-line blocking (paquet livré dans l'ordre, si paquet n perdu, paquet n+i bloqué tant que paquet n pas recu), pas de multi-homing, connexion liée à paire IP/Port (si IP change, connexion doit être réétablie), vulnérable DoS (SYN flood).
+*Ouverture (3-way handshake)*: `SYN` → `SYN+ACK` → `ACK` (connexion établie).
+*Fermeture (4-way)*: `FIN` → `ACK` → `FIN` → `ACK` (chaque sens fermé indépendamment, half-close possible). Ou `FIN` → `FIN+ACK` → `ACK` si simultané.
+*ECMP (Equal Cost Multipath)*: mécanisme routage qui distribue connexions sur plusieurs chemins de coût égal via hashage: Hash(IP_src, IP_dst, Protocole, Port_src, Port_dst) mod nb_sorties. tous paquets même connexion TCP suivent même chemin, deux connexions différentes peuvent emprunter chemins distincts. Conséquence: connexion TCP standard peut pas exploiter plusieurs chemins simultanément.
 #text(red, "UDP"): orienté messages, sans fiabilité, sans contrôle de congestion/flux.
 #text(red, "Motivation SCTP/MPTCP"): migration PSTN => packet, signalisation téléphonique, ni TCP ni UDP n'est adapté.
 #text(red, "SCTP"): combine meilleur des deux. *Couche OSI 4 (Transport)*. Contexte: équipements modernes ont plusieurs interfaces réseau (Wi-Fi, 4G, 5G), d'où besoins de mobilité sans coupure, haute disponibilité et sécurité anti-DoS.
@@ -548,4 +558,67 @@
 
 = EXOS
 
-TODO
+#text(red, "Clefs 802.1x — Récapitulatif"):
+#table(
+  columns: (auto, 1fr, 1fr),
+  inset: 3pt,
+  stroke: 0.4pt,
+  align: left,
+  table.header[*Clef*][*Obtention*][*Usage*],
+  [*PMK* \ (Pairwise Master Key)],
+  [Enterprise: extrait de la AAA Key en fin d'échange EAP \ Personnel: PBKDF2(passphrase, SSID, 4096 iter, 256 bits)],
+  [Clé racine de la session ; entrée du 4-way handshake pour dériver le PTK],
+
+  [*GMK* \ (Group Master Key)], [Généré aléatoirement par l'AP], [Sert à générer le GTK],
+  [*PTK* \ (Pairwise Transient Key)],
+  [PRF(PMK, ANonce, SNonce, AP\_MAC, STA\_MAC)],
+  [Clé de session unicast STA↔AP (unique par paire) ; contient KCK + KEK + TK ; protège aussi le 4-way handshake],
+
+  [*KCK* \ (Key Confirmation Key)],
+  [1er segment du PTK],
+  [Calcule le MIC sur les messages du 4-way handshake (intégrité du handshake)],
+
+  [*KEK* \ (Key Encryption Key)],
+  [2e segment du PTK],
+  [Chiffre le transport de la GTK vers les STAs lors du group-key handshake],
+
+  [*TK* \ (Temporal Key)],
+  [3e segment du PTK \ TKIP: TK = Temporal Enc. Key + MIC Key 1 + MIC Key 2 \ CCMP: TK unique (CBC-MAC gère l'intégrité seul)],
+  [Chiffrement + intégrité des données unicast (CCMP: AES-CTR + AES-CBC-MAC ; TKIP: RC4 + Michael)],
+
+  [*GTK* \ (Group Temporal Key)],
+  [Dérivé du GMK par l'AP ; distribué chiffré via KEK lors du group-key handshake],
+  [Clé commune à toutes les STAs ; chiffre trafic broadcast et multicast],
+)
+
+#text(red, "Méthodologie — Portée et capacité 5G"):
+
+*Données typiques*: débit cible D, bande passante Bp, fréquence porteuse F, SNR requis (dB), puissance émetteur Pe, température T = 300 K, k = 1,38·10⁻²⁰ mW/(Hz·K).
+
+*Étape 1 — Convertir SNR dB → linéaire* (pour Shannon):
+#text(purple, $"Ps/Pb" = 10^("SNR"_"dB" \/ 10)$)
+
+*Étape 2 — Capacité du canal* (Shannon-Hartley) et vérifier D < C:
+#text(purple, $C = B_p dot log_2(1 + "Ps/Pb")$)
+Si D < C : débit atteignable. Si D > C : impossible.
+
+*Étape 3 — Efficacité de codage* (bits par symbole):
+#text(purple, $"Eff" = D \/ B_p$) (en bit/s/Hz)
+
+*Étape 4 — Niveau de bruit thermique*:
+#text(purple, $B_"th" = k dot T dot B_p$) (en mW) #h(1em) puis #h(1em) #text(purple, $L_"Bth" = 10 dot log_10(B_"th" \/ 1 "mW")$) (en dBm)
+
+*Étape 5 — Sensibilité du récepteur* (seuil minimal de réception):
+#text(purple, $S ["dBm"] = L_"Bth" ["dBm"] + "SNR" ["dB"]$)
+
+*Étape 6 — Puissance émetteur en dBm*:
+#text(purple, $P_e ["dBm"] = 10 dot log_10(P_e ["mW"] \/ 1 "mW")$) #h(1em) (ex: 1 W = 30 dBm)
+
+*Étape 7 — Affaiblissement maximal admissible* (budget de liaison):
+#text(purple, $A_"max" ["dB"] = P_e ["dBm"] - S ["dBm"]$)
+
+*Étape 8 — Portée via modèle LOS*: résoudre A = A_max:
+#text(purple, $A_"LOS" = 32 + 20 log(F_"MHz") + 20 log(d_"km")$)
+#text(purple, $d_"km" = 10^((A_"max" - 32 - 20 log(F_"MHz")) \/ 20)$)
+
+_Attention_: résultat sans marge de sécurité. Soustraire la marge (ex. 10 dB) de A_max avant de calculer d.
