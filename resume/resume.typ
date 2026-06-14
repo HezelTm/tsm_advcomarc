@@ -183,22 +183,8 @@
 #image("img/sms_1.png", width: 100%)
 #image("img/sms_2.png", width: 100%)
 #text(red, "Attack: SS7 SMS Interception (Man-in-the-Middle)"): attaque similaire à un MITM, intercepte les SMS (ex. codes 2FA). *Setup (étape 1)*: (A) l'attaquant enregistre le MSISDN de la victime sur un faux MSC via SS7 => (B) le vrai HLR met à jour la localisation vers le faux MSC => (C) le vrai HLR demande au vrai MSC de libérer la mémoire. *Hijacking (étape 2)*: la banque envoie un SMS => le SMS-C demande la localisation au HLR => le HLR répond avec l'adresse du faux MSC => le SMS-C achemine le SMS vers l'attaquant.
-#text(red, "GSM — Limites"): *Débits faibles*: GSM voix = 9.6 kbps, GPRS (1998) = jusqu'à 100 kbps, EDGE (2003) = jusqu'à 200 kbps — insuffisant pour les usages modernes. *Sécurité obsolète*: algorithme A5 conçu dans les années 1980, A5/1 et A5/2 aujourd'hui cassables cryptographiquement — interception des communications possible. *Chiffrement limité à la liaison radio*: A5 protège uniquement le tronçon téléphone↔antenne BTS — le reste du réseau opérateur transporte les données sans chiffrement supplémentaire. *Authentification unidirectionnelle*: seul le mobile est authentifié par le réseau, pas l'inverse — un attaquant peut se faire passer pour une vraie BTS (IMSI Catcher). *Latence élevée* (300–600 ms) incompatible avec les applications temps réel.
-#text(red, "GSM — Forces et Faiblesses"):
-#table(
-  columns: (1fr, 1fr, 1fr),
-  inset: 3pt,
-  stroke: 0.4pt,
-  align: left,
-  table.header[*Force*][*Faiblesse*][*Problème de sécurité*],
-  [Première architecture mobile numérique], [Chiffrement faible (A5/1 et A5/2 cassables)], [Fausse BTS (IMSI Catcher)],
-  [Introduction de la carte SIM],
-  [Authentification unidirectionnelle (réseau non authentifié par le mobile)],
-  [Clonage de SIM via COMP128],
-
-  [Standard mondial (roaming international)], [Peu résistant aux attaques modernes], [],
-  [Base des réseaux modernes (3G/4G/5G en héritent)], [], [],
-)
+#text(red, "GSM — Limites"): *Débits faibles*: GSM voix = 9.6 kbps, GPRS (1998) = jusqu'à 100 kbps, EDGE (2003) = jusqu'à 200 kbps — insuffisant pour les usages modernes. *Latence élevée* (300–600 ms) incompatible avec les applications temps réel. Limites sécurité: voir tableau Aspects critiques ci-dessous.
+#text(red, "GSM — Forces"): première architecture mobile numérique, introduction de la carte SIM, standard mondial (roaming international), base technologique des générations 3G/4G/5G.
 #text(red, "GSM — Aspects critiques et recommandations"):
 #table(
   columns: (auto, 1fr, 1fr, 1fr),
@@ -246,7 +232,7 @@
 #text(red, "Serving GPRS Support Node (SGSN)"): nœud data du cœur, gère la mobilité et l'authentification pour le trafic paquet, achemine les données entre le RNC et le GGSN.
 #text(red, "Gateway GPRS Support Node (GGSN)"): passerelle entre le réseau mobile et Internet, attribue les adresses IP aux mobiles et route le trafic vers l'extérieur.
 #text(red, "USIM (Universal Subscriber Identity Module)"): version 3G de la SIM, supporte l'AKA (Authentication and Key Agreement) et permet l'authentification mutuelle : le terminal peut aussi authentifier le réseau (protection contre les fausses stations de base).
-#text(red, "eNodeB"): station de base UMTS, connectée au RNC via l'interface Iub, gère l'interface radio WCDMA avec les terminaux.
+#text(red, "NodeB"): station de base UMTS, connectée au RNC via l'interface Iub, gère l'interface radio WCDMA avec les terminaux.
 #image("img/umts_auth.png", width: 100%)
 #text(red, "UMTS AKA — Flux général"): protocole à 3 parties (Mobile/USIM, Réseau visité, Home Env./HLR). (1) Home Env. génère vecteurs d'auth et les envoie au réseau visité. (2) Réseau visité envoie RAND || AUTN au mobile. (3) Mobile vérifie AUTN => *réseau authentifié*. (4) Mobile envoie RES. (5) Réseau compare RES=XRES => *mobile authentifié*. (6) Les deux dérivent CK et IK. K ne quitte jamais la SIM ni le HLR.
 #image("img/gen_auth_vector_hn.png", width: 100%)
@@ -274,7 +260,7 @@
 #text(red, "eNodeB"): station de base 4G, gère l'interface radio avec l'UE et communique directement entre eNodeB voisins pour les handovers.
 #text(red, "EPC — Control Plane"): Plan de contrôle de l'EPC, gère la signalisation, l'authentification, la mobilité et les politiques. Aucune donnée utilisateur ne transite ici. *Composé de*: MME, HSS, PCRF, OCS.
 #text(red, "MME (Mobility Management Entity)"): nœud de signalisation principal, authentification, gestion de la mobilité et des sessions, pagination.
-#text(red, "HSS (Home Subscriber Server)"): remplace le HLR, base de données des abonnés et clés de sécurité.
+#text(red, "HSS (Home Subscriber Server)"): remplace le HLR — base de données des abonnés et clés de sécurité (LTE/EPC) et profils IMS (authentification, services).
 #text(red, "PCRF (Policy Charging Rules Function)"): définit les règles de QoS et de facturation en temps réel, décide la priorité de chaque flux.
 #text(red, "OCS (Online Charging System)"): facturation prepaid en temps réel,peut couper ou adapter le service si le crédit est épuisé.
 #text(red, "EPC — User Plane"): Plan de données de l'EPC, achemine les paquets IP entre l'UE et Internet. Séparé du control plane pour des raisons de performance et de scalabilité. *Composé de*: S-GW, P-GW.
@@ -339,7 +325,7 @@ Priorités : VoLTE signaling (1er, QCI 5) => voix (QCI 1) => gaming/V2X (QCI 3) 
 #text(red, "Sécurité 5G — 5G AKA"): acteurs : *AMF/SEAF* (contrôle d'accès core), *AUSF* (authentification), *UDM/ARPF/SIDF* (base abonnés + Ki). Phase 1 (initiation): UE envoie *SUCI* (identité chiffrée, remplace IMSI en clair) ou 5G-GUTI. Phase 2 (auth): échange RAND || AUTN || ngKSI, UE calcule RES, MME vérifie => dérive *K\_AUSF* => *K\_SEAF* => *K\_AMF* => clés NAS/RRC/UP.
 #text(red, "SUCI (Subscriber Concealed Identifier)"): remplace l'IMSI en clair — IMSI chiffré avec la clé publique de l'opérateur, protège la vie privée contre les IMSI catchers.
 #text(red, "Hiérarchie de clés 5G"): K => CK/IK => K\_AUSF => K\_SEAF => K\_AMF => K\_NASint/K\_NASenc (signalisation NAS) => K\_gNB => K\_RRCint/K\_RRCenc (radio) + K\_UPint/K\_UPenc (user plane).
-#text(red, "Comparaison 3G/4G/5G"): intégrité: f9/KASUMI => EIA/SNOW3G+AES => NIA/AES-CMAC+ZUC+HMAC-SHA256. Chiffrement: f8/KASUMI => EEA => NEA/AES+ZUC+SNOW3G. Protection user plane: Non (3G) => Oui (4G/5G). Anonymat: IMSI clair (3G) => GUTI (4G) => SUCI chiffré (5G). Crypto-agilité: faible => moyenne => forte (post-quantique préparé).
+
 
 = Evolution
 
@@ -416,9 +402,8 @@ Priorités : VoLTE signaling (1er, QCI 5) => voix (QCI 1) => gaming/V2X (QCI 3) 
 #text(red, "I-CSCF (Interrogating)"): point d'entrée du réseau IMS, interroge le HSS pour trouver le S-CSCF.
 #text(red, "S-CSCF (Serving)"): nœud central — gère les sessions, l'enregistrement et applique les services.
 #text(red, "MGCF (Media Gateway Control Function)"): contrôle la passerelle vers le PSTN (réseau téléphonique).
-#text(red, "MGW (Media Gateway)"): convertit les flux media entre IP et PSTN.
+#text(red, "MGW (Media Gateway)"): convertit les flux media entre le réseau IP et le PSTN — nécessaire quand l'appelé est sur le réseau fixe ou une autre génération.
 #text(red, "MRF (Media Resource Function)"): gère les ressources media (conférences, annonces).
-#text(red, "HSS"): base de données abonnés IMS (profils, authentification).
 #text(red, "Service Layer"): serveurs d'applications — SIP AS, Parlay/OSA (APIs ouvertes vers les AS).
 #text(red, "Application Layer"): services finaux — conférence, partage de ressources, broadcasting, jeux…
 *Protocoles* : *SIP* (signalisation sessions), *Diameter* (AAA entre HSS et CSCF), *H.248* (contrôle MGW).
@@ -449,7 +434,7 @@ Priorités : VoLTE signaling (1er, QCI 5) => voix (QCI 1) => gaming/V2X (QCI 3) 
 = IPCAN
 
 #text(red, "IP-CAN (IP Connectivity Access Network)"): réseau qui fournit la connectivité IP entre l'UE et le cœur IMS — peut être LTE, Wi-Fi, DSL ou câble. C'est ce qui rend IMS *access-agnostic* : le même cœur IMS/SIP fonctionne quel que soit le type d'accès.
-#text(red, "Media Gateway (MGW)"): convertit les flux media entre le réseau IP et le PSTN — nécessaire quand l'appelé est sur le réseau téléphonique fixe.
+
 
 #image("img/ipcan.png", width: 100%)
 
@@ -746,7 +731,7 @@ Locate SDN place in a virtualization architecture
 #text(red, "NV — Perspective historique"): 4 grandes approches historiques. *VLAN*: isolation logique L2 sur infrastructure partagée. *VPN*: réseau privé virtuel classifié en L1 VPN (circuits physiques dédiés), L2 VPN (tunnels Ethernet/Frame Relay), L3 VPN (routage IP, ex. MPLS), Higher Layer VPNs (SSL, SSH). *Active/Programmable Networks*: deux écoles — Open Signaling (séparation control/forwarding) et Active Networks (nœuds exécutent du code arbitraire) — concepts clés : Programmabilité, Isolation, Provisioning. *Overlay Networks*: réseau logique construit au-dessus d'un ou plusieurs réseaux physiques existants, sans modifier l'infrastructure sous-jacente.
 #text(red, "NV — Business Model"): modèle traditionnel: un seul rôle (ISP). Modèle NV: 2 rôles distincts. *InP (Infrastructure Provider)*: déploie et gère les ressources réseau physiques sous-jacentes. *SP (Service Provider)*: loue des ressources auprès de plusieurs InPs, programme ces ressources pour offrir des services bout-en-bout aux utilisateurs finaux. *End User*: similaire à l'Internet existant, mais la coexistence de plusieurs SPs concurrents offre un choix plus large.
 #text(red, "NV — Architecture et principes"): une NVE (Network Virtualization Environment) fait coexister plusieurs VNs de différents SPs sur les ressources physiques d'un ou plusieurs InPs. *Coexistence*: plusieurs VNs de SPs différents coexistent sur tout ou partie du réseau physique. *Récursion*: un VN parent peut engendrer des VNs enfants (Child VNs). *Héritage*: les VNs enfants héritent des attributs architecturaux du parent. *Revisitation*: un nœud physique peut héberger plusieurs nœuds virtuels d'un même VN.
-#text(red, "NV — Design Goals"): *Flexibilité*: chaque SP libre d'implémenter toute topologie, routage, forwarding et protocoles de contrôle indépendamment du réseau physique et des autres VNs coexistants. *Manageability*: la séparation SP/InP modularise la gestion réseau et introduit l'accountability à chaque couche. *Scalabilité*: coexistence de multiples réseaux sur la même infrastructure. *Isolation*: garantir l'isolation entre VNs coexistants pour la tolérance aux pannes, la sécurité et la vie privée. *Stabilité et Convergence*: erreurs/mauvaises configs dans le réseau physique peuvent déstabiliser toute la NVE ; une instabilité dans un InP (ex. oscillations de routage) peut se propager à tous les VNs hébergés.
+#text(red, "NV — Design Goals"): *Flexibilité*: chaque SP libre d'implémenter toute topologie, routage, forwarding et protocoles de contrôle indépendamment du réseau physique et des autres VNs coexistants. *Manageability*: la séparation SP/InP modularise la gestion réseau et introduit l'accountability à chaque couche. *Scalabilité*: coexistence de multiples réseaux sur la même infrastructure. *Isolation*: garantir l'isolation entre VNs coexistants pour la tolérance aux pannes, la sécurité et la vie privée. *Stabilité et Convergence*: erreurs/mauvaises configs dans le réseau physique peuvent déstabiliser toute la NVE ; une instabilité dans un InP (ex. oscillations de routage) peut se propager à tous les VNs hébergés. *Programmabilité*: condition indispensable à la flexibilité — sans programmabilité des éléments réseau, les SPs ne peuvent pas déployer des protocoles personnalisés ni des services diversifiés. *Legacy Support*: la rétrocompatibilité est une contrainte forte lors du déploiement de toute nouvelle technologie réseau. *Hétérogénéité*: deux niveaux — (1) hétérogénéité des technologies sous-jacentes (optique, sans fil, capteurs), (2) un VN bout-en-bout construit sur ces technologies hétérogènes peut lui-même être hétérogène ; les SPs doivent pouvoir créer des VNs cross-domaines sans solutions spécifiques à chaque technologie.
 #text(red, "NV — Défis de recherche"): Interfaçage, Signalisation et bootstrapping, Découverte des ressources et topologie, Allocation des ressources et provisioning, Contrôle d'admission et surveillance d'usage, Nœuds et liens virtuels, Nommage et adressage, Gestion de la mobilité, Monitoring/Configuration/Gestion des pannes, Sécurité et vie privée, Interopérabilité, Économie de la virtualisation réseau.
 #text(red, "NV — À retenir"): la NV occupe une position unique dans l'espace de virtualisation. *D'un côté*: un réseau virtualisé est nécessaire pour interconnecter tous les équipements virtualisés et leur donner une apparence fidèle à leurs homologues physiques. *De l'autre*: l'Internet a atteint un plateau — un redesign est une nécessité, pas un luxe. La NV peut jouer un rôle moteur pour promouvoir l'innovation via des technologies disruptives.
 #image("img/nv_internal_external.png", width: 100%)
@@ -805,7 +790,7 @@ Locate SDN place in a virtualization architecture
 #text(red, "OpenFlow — Instructions"): déclenchées immédiatement quand un paquet matche une entrée. Résultent en modifications du paquet, de l'action set ou du pipeline. *Meter meter_id*: diriger le paquet vers un compteur de débit (meter) pour du rate-limiting. *Apply-Actions*: exécuter des actions immédiatement (sans attendre la fin du pipeline). *Clear-Actions*: vider complètement l'action set accumulé. *Write-Actions*: ajouter/fusionner des actions dans l'action set courant (exécutées en fin de pipeline). *Write-Metadata*: écrire une valeur dans le champ metadata (pour passer de l'info à la table suivante). *Goto-Table next-id*: rediriger le paquet vers une table de numéro supérieur. Max une instruction de chaque type par entrée, exécutées dans cet ordre précis.
 #text(red, "OpenFlow — Actions"): *Output*: forwarder vers un port (ports spéciaux: CONTROLLER, ALL, NORMAL). *Set-Queue*: assigner queue. *Drop*: implicite (action set sans output). *Group*: traiter via groupe. *Push/Pop-Tag*: ajouter/retirer VLAN tags. *Set-Field*: modifier champs header. *Change-TTL*: modifier TTL IPv4/IPv6/MPLS.
 #text(red, "OpenFlow — Group Table"): table permettant des comportements de forwarding avancés (multicast, load-balancing, failover). Une flow table peut pointer vers un groupe au lieu d'un port direct. Entrée: Group ID | Group Type | Counters | *Action Buckets* (liste ordonnée de séquences d'actions à exécuter). 4 types de groupe: *All* (exécute tous les buckets, paquet cloné pour chaque => multicast/broadcast), *Indirect* (un seul bucket, permet à plusieurs règles de pointer vers un même groupe => convergence plus rapide), *Select* (exécute un bucket selon algorithme de sélection ex. round-robin => load-balancing), *Fast Failover* (exécute le premier bucket dont le port associé est actif => basculement automatique sans contacter le controller).
-#text(red, "OpenFlow — Meter Table"): mesure et contrôle le débit par flux => QoS simple (rate-limiting). Entrée: Meter ID | Meter Bands | Counters. Meter Band: Band Type (drop ou modifier DSCP) | Rate (Kbps) | Counters. Combinable avec queues pour QoS complexe.
+#text(red, "OpenFlow — Meter Table"): mesure et contrôle le débit par flux => QoS simple (rate-limiting). Entrée: Meter ID | Meter Bands | Counters. Meter Band: Band Type (drop ou modifier DSCP) | Rate (Kbps) | Counters. Un meter peut avoir plusieurs bands; la band appliquée est celle avec le taux configuré le plus élevé inférieur au taux mesuré courant (les paquets ne sont traités que par une seule band). Combinable avec queues pour QoS complexe.
 #text(red, "OpenFlow — Messages"): 3 types de messages. *Controller=>Switch* (le controller interroge ou commande le switch): *Features* (demander les capacités du switch), *Configuration* (paramétrer le switch), *Modify-State* (ajouter/modifier/supprimer des règles dans les tables), *Read-State* (lire stats et configuration), *Packet-out* (injecter un paquet sur un port), *Barrier* (synchronisation: attendre que toutes les opérations précédentes soient terminées). *Asynchronous* (le switch notifie le controller spontanément): *Packet-in* (paquet sans règle correspondante => envoyé au controller pour décision), *Flow-Removed* (règle expirée supprimée), *Port-status* (changement d'état d'un port), *Error*. *Symmetric* (dans les deux sens sans sollicitation): *Hello* (établissement de connexion), *Echo* (vérification que la connexion est vivante + mesure latence), *Experimenter* (extensions propriétaires).
 #text(red, "OpenFlow — Flow Instantiation"): 3 façons de peupler les flow tables. *Reactive* (réactif): quand un paquet arrive sans règle correspondante => le switch envoie un *Packet-in* au controller => le controller calcule la décision => répond avec un *Flow Mod* (message pour installer la règle dans le switch) => règle installée pour les prochains paquets. Simple et flexible mais latence sur le premier paquet de chaque flux. *Proactive* (proactif): le controller pré-installe toutes les règles dans les tables avant l'arrivée du trafic => très faible latence, mais nécessite de connaître à l'avance tous les flux possibles. *Hybrid*: combinaison — proactif pour le trafic prévisible (faible latence) + réactif pour les cas particuliers (flexibilité).
 #text(red, "OpenFlow — Network Discovery (LLDP)"): le controller effectue la découverte de topologie via LLDP. Les switches envoient des trames LLDP à leurs voisins (multicast MAC spécial, EtherType 0x88cc) => renvoyées au controller via Packet-in => controller reconstruit la topologie.
